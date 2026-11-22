@@ -26,10 +26,11 @@ book:
         - ch01_rascetnye_kompleksy.qmd
         - ch02_osnovy_mke.qmd
         - ch03_sofistik.qmd
-        - ch04_cadinp_teddy.qmd
+        - ch04_teddy.qmd
+        - ch05_cadinp.qmd
     - part: "Лабораторные работы"
       chapters:
-        - ch05_lab1_balka.qmd
+        - ch06_lab1_balka.qmd
 
 crossref:
   eq-prefix: "формула"
