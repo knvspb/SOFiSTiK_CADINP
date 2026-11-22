@@ -30,6 +30,7 @@ book:
 
 crossref:
   eq-prefix: "формула"
+  sec-prefix: "п."
   fig-prefix: "рис."
   tbl-prefix: "табл."
 
