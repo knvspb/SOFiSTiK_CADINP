@@ -5,6 +5,9 @@ project:
     - code/*.dat
 
 lang: ru
+language:
+  crossref-sec-prefix: "п."
+  crossref-ch-prefix: "гл."
 
 book:
   title: "Расчёт мостовых конструкций в SOFiSTiK на языке CADINP"
@@ -30,7 +33,6 @@ book:
 
 crossref:
   eq-prefix: "формула"
-  sec-prefix: "п."
   fig-prefix: "рис."
   tbl-prefix: "табл."
 
