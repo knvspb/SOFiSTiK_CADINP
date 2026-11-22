@@ -1,0 +1,262 @@
+$ =====================================================================
+$  РКПМС. Лабораторная работа 1. Расчет простейшей плоской балочной схемы
+$  ПРИМЕР (вариант 0): L = 6 м, a = 25% L, P1 = 10 кН, P2 = 15 кН,
+$                      q1 = 5 кН/м, сталь С235, двутавр 27 по ГОСТ 8239-89
+$  SOFiSTiK 2025
+$ =====================================================================
+
++prog aqua urs:1
+head Материалы и сечения
+echo opt full val no                 // сокращенный отчет
+norm dc sp ndc 16-13330              // российские нормы, СП 16.13330 (стальные конструкции)
+
+$ Материал 1 - сталь С235 по СП 16.13330
+stee no 1 type c clas 235 titl 'Сталь С235'
+
+$ Сечение 1 - двутавр 27 по ГОСТ 8239-89 из материала 1
+prof no 1 type gost z1 27 mno 1
+end
+
++prog sofimsha urs:2
+head Расчетная схема балки
+echo opt full val no
+syst type 2d gdir negy               // плоская рама в плоскости XY, сила тяжести по -Y
+
+$ Узлы: шаг 0,75 м; узел 5 - точка приложения P1, узел 7 - точка приложения P2
+node no 1 x 0.00 y 0 fix pp          // шарнирно-неподвижная опора (PX + PY)
+node no 2 x 0.75 y 0
+node no 3 x 1.50 y 0
+node no 4 x 2.25 y 0
+node no 5 x 3.00 y 0                 // x = L/2   - P1
+node no 6 x 3.75 y 0
+node no 7 x 4.50 y 0                 // x = L - a - P2
+node no 8 x 5.25 y 0
+node no 9 x 6.00 y 0 fix py          // шарнирно-подвижная опора (PY)
+
+$ Конечные элементы: элемент i соединяет узлы i и i+1, сечение 1
+beam no 1 na 1 ne 2 ncs 1
+beam no 2 na 2 ne 3 ncs 1
+beam no 3 na 3 ne 4 ncs 1
+beam no 4 na 4 ne 5 ncs 1
+beam no 5 na 5 ne 6 ncs 1
+beam no 6 na 6 ne 7 ncs 1
+beam no 7 na 7 ne 8 ncs 1
+beam no 8 na 8 ne 9 ncs 1
+end
+
++prog sofiload urs:3
+head Загружения (все комбинации нагрузок)
+echo opt full val no
+$ Собственный вес не учитывается (FACD по умолчанию 0)
+$ Положительная нагрузка PG направлена по силе тяжести, т.е. вниз
+
+lc no 1 titl 'P1 = 10 кН в середине пролета'
+    node no 5 type pg p1 10          // P1 = 10 кН в узле 5 (x = L/2 = 3,0 м)
+lc no 2 titl 'P2 = 15 кН на расстоянии a от правой опоры'
+    node no 7 type pg p1 15          // P2 = 15 кН в узле 7 (x = L - a = 4,5 м)
+lc no 3 titl 'q1 = 5 кН/м по всему пролету'
+    beam from 1 to 8 type pg pa 5    // q1 = 5 кН/м на элементах 1...8
+lc no 4 titl 'P1 + P2'
+    node no 5 type pg p1 10          // P1 = 10 кН в узле 5 (x = L/2 = 3,0 м)
+    node no 7 type pg p1 15          // P2 = 15 кН в узле 7 (x = L - a = 4,5 м)
+lc no 5 titl 'P1 + q1'
+    node no 5 type pg p1 10          // P1 = 10 кН в узле 5 (x = L/2 = 3,0 м)
+    beam from 1 to 8 type pg pa 5    // q1 = 5 кН/м на элементах 1...8
+lc no 6 titl 'P2 + q1'
+    node no 7 type pg p1 15          // P2 = 15 кН в узле 7 (x = L - a = 4,5 м)
+    beam from 1 to 8 type pg pa 5    // q1 = 5 кН/м на элементах 1...8
+lc no 7 titl 'P1 + P2 + q1'
+    node no 5 type pg p1 10          // P1 = 10 кН в узле 5 (x = L/2 = 3,0 м)
+    node no 7 type pg p1 15          // P2 = 15 кН в узле 7 (x = L - a = 4,5 м)
+    beam from 1 to 8 type pg pa 5    // q1 = 5 кН/м на элементах 1...8
+end
+
++prog ase urs:4
+head Статический расчет
+echo opt full val no
+lc no all                            // рассчитать все загружения
+end
+
++prog wing urs:5
+head Графика: расчетная схема, эпюры M, Q, деформированные схемы
+$ ---------------- Общие настройки ----------------
+fill type hatc numb 1                // штриховка эпюр
+lego type fskl x off                 // не выводить легенду штриховки
+$ Масштабы - локальные переменные (действуют только в этом блоке WING)
+let#sc  50                           // масштаб листа 1:50
+let#fac 100                          // увеличение перемещений на деформированной схеме
+let#mu  10*#sc/#fac                  // масштаб стрелок перемещений: мм в 1 см листа (= 5)
+$ Высота текста на всех рисунках - 0,25 см
+
+$ ---------------- Лист 0. Расчетная схема ----------------
+size type -lp marg yes spli 2*1 sc #sc
+    $ Рисунок 1: схема с номерами узлов
+    stru numn nno schh 0.25
+    $ Рисунок 2: схема с номерами элементов и номерами сечений
+    and posi 2
+    stru nume eno schh 0.25
+    and
+    stru nume sno schh 0.25
+
+$ ---------------- Лист 1. P1 = 10 кН в середине пролета ----------------
+size type -lp marg yes spli 3*1 sc #sc
+    lc no 1
+    $ Рисунок 1: нагрузка и эпюра изгибающих моментов My
+    load type all schh 0.25
+    and
+    beam type my fill vert schh 0.25
+    $ Рисунок 2: эпюра поперечных сил Vz
+    and posi 2
+    beam type vz fill vert schh 0.25
+    $ Рисунок 3: деформированная схема
+    and posi 3
+        colo c12 1004                // исходная схема: черная, штрихпунктир
+        stru
+    and
+        defo type yes fac #fac       // деформированная схема, перемещения x#fac
+        colo c12 2201                // красная сплошная, двойная толщина
+        stru
+        defo type no
+    and
+        colo c1 stan                 // стандартные цвета
+        node type uy unit #mu schh 0.25   // стрелки перемещений UY, мм
+
+$ ---------------- Лист 2. P2 = 15 кН на расстоянии a от правой опоры ----------------
+size type -lp marg yes spli 3*1 sc #sc
+    lc no 2
+    $ Рисунок 1: нагрузка и эпюра изгибающих моментов My
+    load type all schh 0.25
+    and
+    beam type my fill vert schh 0.25
+    $ Рисунок 2: эпюра поперечных сил Vz
+    and posi 2
+    beam type vz fill vert schh 0.25
+    $ Рисунок 3: деформированная схема
+    and posi 3
+        colo c12 1004                // исходная схема: черная, штрихпунктир
+        stru
+    and
+        defo type yes fac #fac       // деформированная схема, перемещения x#fac
+        colo c12 2201                // красная сплошная, двойная толщина
+        stru
+        defo type no
+    and
+        colo c1 stan                 // стандартные цвета
+        node type uy unit #mu schh 0.25   // стрелки перемещений UY, мм
+
+$ ---------------- Лист 3. q1 = 5 кН/м по всему пролету ----------------
+size type -lp marg yes spli 3*1 sc #sc
+    lc no 3
+    $ Рисунок 1: нагрузка и эпюра изгибающих моментов My
+    load type all schh 0.25
+    and
+    beam type my fill vert schh 0.25
+    $ Рисунок 2: эпюра поперечных сил Vz
+    and posi 2
+    beam type vz fill vert schh 0.25
+    $ Рисунок 3: деформированная схема
+    and posi 3
+        colo c12 1004                // исходная схема: черная, штрихпунктир
+        stru
+    and
+        defo type yes fac #fac       // деформированная схема, перемещения x#fac
+        colo c12 2201                // красная сплошная, двойная толщина
+        stru
+        defo type no
+    and
+        colo c1 stan                 // стандартные цвета
+        node type uy unit #mu schh 0.25   // стрелки перемещений UY, мм
+
+$ ---------------- Лист 4. P1 + P2 ----------------
+size type -lp marg yes spli 3*1 sc #sc
+    lc no 4
+    $ Рисунок 1: нагрузка и эпюра изгибающих моментов My
+    load type all schh 0.25
+    and
+    beam type my fill vert schh 0.25
+    $ Рисунок 2: эпюра поперечных сил Vz
+    and posi 2
+    beam type vz fill vert schh 0.25
+    $ Рисунок 3: деформированная схема
+    and posi 3
+        colo c12 1004                // исходная схема: черная, штрихпунктир
+        stru
+    and
+        defo type yes fac #fac       // деформированная схема, перемещения x#fac
+        colo c12 2201                // красная сплошная, двойная толщина
+        stru
+        defo type no
+    and
+        colo c1 stan                 // стандартные цвета
+        node type uy unit #mu schh 0.25   // стрелки перемещений UY, мм
+
+$ ---------------- Лист 5. P1 + q1 ----------------
+size type -lp marg yes spli 3*1 sc #sc
+    lc no 5
+    $ Рисунок 1: нагрузка и эпюра изгибающих моментов My
+    load type all schh 0.25
+    and
+    beam type my fill vert schh 0.25
+    $ Рисунок 2: эпюра поперечных сил Vz
+    and posi 2
+    beam type vz fill vert schh 0.25
+    $ Рисунок 3: деформированная схема
+    and posi 3
+        colo c12 1004                // исходная схема: черная, штрихпунктир
+        stru
+    and
+        defo type yes fac #fac       // деформированная схема, перемещения x#fac
+        colo c12 2201                // красная сплошная, двойная толщина
+        stru
+        defo type no
+    and
+        colo c1 stan                 // стандартные цвета
+        node type uy unit #mu schh 0.25   // стрелки перемещений UY, мм
+
+$ ---------------- Лист 6. P2 + q1 ----------------
+size type -lp marg yes spli 3*1 sc #sc
+    lc no 6
+    $ Рисунок 1: нагрузка и эпюра изгибающих моментов My
+    load type all schh 0.25
+    and
+    beam type my fill vert schh 0.25
+    $ Рисунок 2: эпюра поперечных сил Vz
+    and posi 2
+    beam type vz fill vert schh 0.25
+    $ Рисунок 3: деформированная схема
+    and posi 3
+        colo c12 1004                // исходная схема: черная, штрихпунктир
+        stru
+    and
+        defo type yes fac #fac       // деформированная схема, перемещения x#fac
+        colo c12 2201                // красная сплошная, двойная толщина
+        stru
+        defo type no
+    and
+        colo c1 stan                 // стандартные цвета
+        node type uy unit #mu schh 0.25   // стрелки перемещений UY, мм
+
+$ ---------------- Лист 7. P1 + P2 + q1 ----------------
+size type -lp marg yes spli 3*1 sc #sc
+    lc no 7
+    $ Рисунок 1: нагрузка и эпюра изгибающих моментов My
+    load type all schh 0.25
+    and
+    beam type my fill vert schh 0.25
+    $ Рисунок 2: эпюра поперечных сил Vz
+    and posi 2
+    beam type vz fill vert schh 0.25
+    $ Рисунок 3: деформированная схема
+    and posi 3
+        colo c12 1004                // исходная схема: черная, штрихпунктир
+        stru
+    and
+        defo type yes fac #fac       // деформированная схема, перемещения x#fac
+        colo c12 2201                // красная сплошная, двойная толщина
+        stru
+        defo type no
+    and
+        colo c1 stan                 // стандартные цвета
+        node type uy unit #mu schh 0.25   // стрелки перемещений UY, мм
+
+end

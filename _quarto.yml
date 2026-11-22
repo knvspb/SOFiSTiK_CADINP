@@ -1,0 +1,48 @@
+project:
+  type: book
+  output-dir: _book
+  resources:
+    - code/*.dat
+
+lang: ru
+
+book:
+  title: "Расчёт мостовых конструкций в SOFiSTiK на языке CADINP"
+  subtitle: "Лабораторный практикум. Черновик для апробации"
+  author: "Козак Н.В."
+  date: last-modified
+  date-format: "DD.MM.YYYY"
+  repo-url: https://github.com/knvspb/SOFiSTiK_CADINP
+  repo-actions: [source, issue]
+  search: true
+  page-navigation: true
+  chapters:
+    - index.qmd
+    - part: "Теоретические основы"
+      chapters:
+        - ch01_rascetnye_kompleksy.qmd
+        - ch02_osnovy_mke.qmd
+        - ch03_sofistik.qmd
+        - ch04_cadinp_teddy.qmd
+    - part: "Лабораторные работы"
+      chapters:
+        - ch05_lab1_balka.qmd
+
+crossref:
+  eq-prefix: "формула"
+  fig-prefix: "рис."
+  tbl-prefix: "табл."
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-title: "В этой главе"
+    number-sections: true
+    number-depth: 3
+    code-copy: true
+    code-overflow: scroll
+    html-math-method: mathjax
+    syntax-definitions:
+      - syntax/cadinp.xml
+    highlight-style: github

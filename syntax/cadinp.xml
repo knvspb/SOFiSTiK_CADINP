@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language>
+<!-- Упрощённая подсветка входного языка SOFiSTiK CADINP для учебного пособия -->
+<language name="cadinp" section="Other" version="1" kateversion="5.0" extensions="*.dat" casesensitive="0">
+  <highlighting>
+    <list name="programs">
+      <item>aqua</item>
+      <item>sofimsha</item>
+      <item>sofimshc</item>
+      <item>sofiload</item>
+      <item>ase</item>
+      <item>maxima</item>
+      <item>ella</item>
+      <item>wing</item>
+      <item>results</item>
+    </list>
+    <list name="control">
+      <item>head</item>
+      <item>end</item>
+      <item>echo</item>
+      <item>loop</item>
+      <item>endloop</item>
+      <item>if</item>
+      <item>elseif</item>
+      <item>else</item>
+      <item>endif</item>
+    </list>
+    <contexts>
+      <context name="Normal" attribute="Normal Text" lineEndContext="#stay">
+        <RegExpr attribute="Prog" String="^[ \t]*[+-]prog\b" insensitive="true"/>
+        <keyword attribute="Prog" String="programs"/>
+        <keyword attribute="Control" String="control"/>
+        <RegExpr attribute="Comment" String="(^|[ \t])(\$|//|!)( |$).*$"/>
+        <RegExpr attribute="Comment" String="^[ \t]*\$.*$"/>
+        <RegExpr attribute="Preproc" String="#(define|enddef|include|undef)\b" insensitive="true"/>
+        <RegExpr attribute="Variable" String="(let|sto|prt|del)#[A-Za-z_][A-Za-z0-9_]*" insensitive="true"/>
+        <RegExpr attribute="Variable" String="#[A-Za-z_][A-Za-z0-9_]*"/>
+        <DetectChar attribute="String" char="'" context="String"/>
+        <RegExpr attribute="Unit" String="\[[^\]]*\]"/>
+        <RegExpr attribute="Number" String="-?\b[0-9]+(\.[0-9]*)?([eE][-+]?[0-9]+)?\b"/>
+      </context>
+      <context name="String" attribute="String" lineEndContext="#pop">
+        <DetectChar attribute="String" char="'" context="#pop"/>
+      </context>
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal Text" defStyleNum="dsNormal"/>
+      <itemData name="Prog" defStyleNum="dsKeyword" bold="1"/>
+      <itemData name="Control" defStyleNum="dsControlFlow"/>
+      <itemData name="Comment" defStyleNum="dsComment"/>
+      <itemData name="Preproc" defStyleNum="dsPreprocessor"/>
+      <itemData name="Variable" defStyleNum="dsVariable"/>
+      <itemData name="String" defStyleNum="dsString"/>
+      <itemData name="Unit" defStyleNum="dsAttribute"/>
+      <itemData name="Number" defStyleNum="dsDecVal"/>
+    </itemDatas>
+  </highlighting>
+  <general>
+    <comments>
+      <comment name="singleLine" start="$"/>
+    </comments>
+    <keywords casesensitive="0"/>
+  </general>
+</language>
